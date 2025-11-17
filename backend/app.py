@@ -5,7 +5,6 @@ from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from typing import List, Dict, Optional
-import docker
 import asyncio
 import json
 import os
@@ -35,9 +34,6 @@ security = HTTPBearer()
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 SECRET_KEY = "your-secret-key-here"
 ALGORITHM = "HS256"
-
-# Docker client
-docker_client = docker.from_env()
 
 # WebSocket connections
 active_connections: Dict[str, WebSocket] = {}
@@ -123,7 +119,7 @@ async def create_project(
     db.commit()
     db.refresh(project)
     return project
-    
+
 # Code execution endpoint
 @app.post("/api/execute")
 async def execute_code(
@@ -137,7 +133,6 @@ async def execute_code(
             f.write(execution.code)
         
         # Execute using local Python (без Docker)
-        import subprocess
         result = subprocess.run(
             ["python", temp_file],
             capture_output=True,
@@ -153,6 +148,63 @@ async def execute_code(
     except Exception as e:
         return {"output": None, "error": str(e)}
 
+# AI Assistant routes
+@app.post("/api/chat/assistant")
+async def chat_with_assistant(message: dict):
+    """
+    AI ассистент для помощи в программировании
+    """
+    try:
+        user_message = message.get("message", "")
+        
+        # Простой AI-ассистент (можно заменить на OpenAI API, Hugging Face и т.д.)
+        response = generate_ai_response(user_message)
+        
+        return {
+            "response": response,
+            "type": "ai_assistant"
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+def generate_ai_response(user_message: str) -> str:
+    """
+    Генерируем ответ AI-ассистента
+    В будущем можно подключить OpenAI API, Claude, или локальную модель
+    """
+    message_lower = user_message.lower()
+    
+    # Базовые ответы ассистента
+    if "ошибка" in message_lower or "error" in message_lower:
+        return "Проверьте синтаксис Python. Убедитесь, что все скобки закрыты, отступы правильные, и переменные объявлены."
+    
+    elif "как сделать" in message_lower or "how to" in message_lower:
+        return "Я могу помочь с примерами кода! Опишите конкретнее, что вы хотите сделать."
+    
+    elif "игра" in message_lower or "game" in message_lower:
+        return """Для создания игры на Python используйте Pygame. Вот базовый шаблон:
+
+import pygame
+pygame.init()
+screen = pygame.display.set_mode((800, 600))
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+    screen.fill((0, 0, 0))
+    pygame.display.flip()
+pygame.quit()"""
+
+    elif "список" in message_lower or "массив" in message_lower or "list" in message_lower:
+        return "Для работы со списками в Python:\n\nmy_list = [1, 2, 3]\nmy_list.append(4)  # Добавить элемент\nfor item in my_list:  # Перебор элементов\n    print(item)"
+
+    elif "функция" in message_lower or "function" in message_lower:
+        return "Создание функции в Python:\n\ndef my_function(параметры):\n    '''Документация функции'''\n    # код функции\n    return результат"
+
+    else:
+        return "Я ваш AI-ассистент для программирования на Python! Могу помочь с:\n- Поиском ошибок в коде\n- Примеры кода\n- Объяснением концепций\n- Созданием игр на Pygame\n\nЗадайте вопрос о программировании!"
 
 # WebSocket for real-time collaboration
 @app.websocket("/ws/{project_id}")
