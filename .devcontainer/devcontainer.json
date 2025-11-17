@@ -7,7 +7,7 @@
     }
   },
   "forwardPorts": [3000, 8000],
-  "postCreateCommand": "bash .devcontainer/setup.sh",
+  "postCreateCommand": "pip3 install -r backend/requirements.txt && cd frontend && npm install",
   "customizations": {
     "vscode": {
       "extensions": [
