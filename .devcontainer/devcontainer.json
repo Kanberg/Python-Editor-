@@ -1,25 +1,13 @@
 {
-  "name": "Python Web IDE Codespace",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "name": "Python Web IDE",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11",
   "features": {
-    "ghcr.io/devcontainers/features/python:1": {
-      "version": "3.11"
-    },
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-    "ghcr.io/devcontainers-contrib/features/docker-compose:1": {}
-  },
-  "forwardPorts": [3000, 8000],
-  "portsAttributes": {
-    "3000": {
-      "label": "Frontend Application",
-      "onAutoForward": "notify"
-    },
-    "8000": {
-      "label": "Backend API (FastAPI)",
-      "onAutoForward": "notify"
+    "ghcr.io/devcontainers/features/node:1": {
+      "version": "18"
     }
   },
-  "postCreateCommand": "sh .devcontainer/setup.sh",
+  "forwardPorts": [3000, 8000],
+  "postCreateCommand": "bash .devcontainer/setup.sh",
   "customizations": {
     "vscode": {
       "extensions": [
