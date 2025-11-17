@@ -157,8 +157,10 @@ async def chat_with_assistant(message: dict):
     try:
         user_message = message.get("message", "")
         
-        # Простой AI-ассистент (можно заменить на OpenAI API, Hugging Face и т.д.)
+        # Используем базового ассистента (можно заменить на продвинутую версию)
         response = generate_ai_response(user_message)
+        # Чтобы использовать OpenAI, раскомментируйте строку ниже:
+        # response = generate_ai_response_advanced(user_message)
         
         return {
             "response": response,
@@ -197,7 +199,7 @@ while running:
     pygame.display.flip()
 pygame.quit()"""
 
-    elif "список" in message_lower or "массив" in message_lower or "list" in message_lower:
+    elif "список" in message_lower or "массив" в message_lower or "list" in message_lower:
         return "Для работы со списками в Python:\n\nmy_list = [1, 2, 3]\nmy_list.append(4)  # Добавить элемент\nfor item in my_list:  # Перебор элементов\n    print(item)"
 
     elif "функция" in message_lower or "function" in message_lower:
@@ -205,6 +207,36 @@ pygame.quit()"""
 
     else:
         return "Я ваш AI-ассистент для программирования на Python! Могу помочь с:\n- Поиском ошибок в коде\n- Примеры кода\n- Объяснением концепций\n- Созданием игр на Pygame\n\nЗадайте вопрос о программировании!"
+
+# Продвинутая версия AI-ассистента с OpenAI
+import openai
+import os
+
+def generate_ai_response_advanced(user_message: str) -> str:
+    """
+    Используем OpenAI API для более умных ответов
+    Требует установки: pip install openai
+    И настройки API ключа: os.environ["OPENAI_API_KEY"]
+    """
+    try:
+        # Раскомментируйте для использования OpenAI
+        # openai.api_key = os.getenv("OPENAI_API_KEY")
+        
+        # response = openai.ChatCompletion.create(
+        #     model="gpt-3.5-turbo",
+        #     messages=[
+        #         {"role": "system", "content": "You are a helpful Python programming assistant."},
+        #         {"role": "user", "content": user_message}
+        #     ],
+        #     max_tokens=500
+        # )
+        # return response.choices[0].message.content
+        
+        # Временно используем базовые ответы
+        return generate_ai_response(user_message)
+        
+    except Exception as e:
+        return f"Ошибка AI ассистента: {str(e)}"
 
 # WebSocket for real-time collaboration
 @app.websocket("/ws/{project_id}")
