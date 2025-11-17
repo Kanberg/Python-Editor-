@@ -123,7 +123,7 @@ async def create_project(
     db.commit()
     db.refresh(project)
     return project
-
+    
 # Code execution endpoint
 @app.post("/api/execute")
 async def execute_code(
@@ -131,28 +131,28 @@ async def execute_code(
     credentials: HTTPAuthorizationCredentials = Depends(security)
 ):
     try:
-        # Create temporary file with Python 3.14.0 code
+        # Create temporary file with Python code
         temp_file = f"/tmp/{uuid.uuid4()}.py"
         with open(temp_file, 'w') as f:
             f.write(execution.code)
         
-        # Execute using Python 3.14.0 Docker container
-        result = docker_client.containers.run(
-            "python:3.14.0-alpine",
-            f"python /tmp/{os.path.basename(temp_file)}",
-            volumes={temp_file: {'bind': f'/tmp/{os.path.basename(temp_file)}', 'mode': 'ro'}},
-            remove=True,
-            stdout=True,
-            stderr=True
+        # Execute using local Python (без Docker)
+        import subprocess
+        result = subprocess.run(
+            ["python", temp_file],
+            capture_output=True,
+            text=True,
+            timeout=10
         )
         
         os.remove(temp_file)
-        return {"output": result.decode('utf-8'), "error": None}
+        return {"output": result.stdout, "error": result.stderr}
         
-    except docker.errors.ContainerError as e:
-        return {"output": None, "error": e.stderr.decode('utf-8')}
+    except subprocess.TimeoutExpired:
+        return {"output": None, "error": "Execution timed out"}
     except Exception as e:
         return {"output": None, "error": str(e)}
+
 
 # WebSocket for real-time collaboration
 @app.websocket("/ws/{project_id}")
